@@ -1,0 +1,208 @@
+</html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>List of Books</title>
+    <style>
+        /* Styling for the page and list */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+            position: relative;
+        }
+
+        h1 {
+            color: #4A4A4A;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Book details */
+        .book-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-details span {
+            margin-top: 5px;
+        }
+
+        /* Buttons */
+        button {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button.primary {
+            background-color: #4a90e2;
+            color: white;
+        }
+
+        button.secondary {
+            background-color: #f56c6c;
+            color: white;
+        }
+
+        button.success {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        /* Search */
+        .search-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* Shifts the search button to the right */
+            margin-bottom: 20px;
+        }
+
+        input[type=text] {
+            padding: 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button.search {
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            background-color: #4a90e2;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        button.search:hover {
+            background-color: #357EBD;
+        }
+
+        /* Logout button */
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info span {
+            margin-right: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .logout-container {
+            margin-left: 10px;
+        }
+
+        button.logout {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            background-color: #f56c6c;
+            color: white;
+        }
+
+        button.logout:hover {
+            background-color: #e81123;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="user-info">
+        <span>Welcome, {{ current_user.username }}</span>
+        <div class="logout-container">
+            <a href="{{ url_for('auth.logout') }}"><button class="logout">Logout</button></a>
+        </div>
+    </div>
+    <h1>List of Books</h1>
+    <div class="search-container">
+        <input type="text" id="search" placeholder="Search...">
+        <button class="search" onclick="searchBooks()">Search</button>
+    </div>
+    <a href="{{ url_for('add_book') }}"><button class="primary">Add New Book</button></a>
+    <ul>
+        {% for book in books %}
+        <li>
+            <div class="book-details">
+                <strong>{{ book.title }}</strong> by {{ book.author }}
+                <span>No. of Pages: {{ book.isbn  }}</span>
+                {% if book.borrower %}
+                    <span>Borrowed by: {{ book.borrower }}</span>
+                {% endif %}
+                {% if book.available %}
+                    <span style="color: green;">(Available)</span>
+                {% else %}
+                    <span style="color: red;">(Not Available)</span>
+                {% endif %}
+            </div>
+            
+            <div>
+                {% if book.available %}
+                    <a href="{{ url_for('borrow_book', book_id=book.id) }}"><button class="primary">Borrow</button></a>
+                {% else %}
+                    <!-- Form for the return book action -->
+                    <form action="{{ url_for('return_book', book_id=book.id) }}" method="POST" style="display: inline-block;">
+                        <button class="success">Return</button>
+                    </form>
+                {% endif %}
+                <a href="{{ url_for('update_book', book_id=book.id) }}"><button class="primary">Update</button></a>
+                <a href="{{ url_for('delete_book', book_id=book.id) }}" onclick="return confirm('Are you sure you want to delete this book?')"><button class="secondary">Delete</button></a>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    <script>
+        function searchBooks() {
+            // Get input value
+            var input = document.getElementById("search").value.toUpperCase();
+            // Get list items
+            var items = document.querySelectorAll("li");
+            // Loop through all list items, and hide those who don't match the search query
+            for (var i = 0; i < items.length; i++) {
+                var title = items[i].getElementsByTagName("strong")[0];
+                if (title.innerHTML.toUpperCase().indexOf(input) > -1) {
+                    items[i].style.display = "";
+                } else {
+                    items[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
